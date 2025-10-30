@@ -6,10 +6,10 @@ pkgs.buildNpmPackage rec {
 
   src = pkgs.fetchurl {
     url = "https://registry.npmjs.org/@fission-ai/openspec/-/openspec-${version}.tgz";
-    sha256 = "sha256-1w1f0b92i32jh5pbwq4mhvrkbdp6l82hk193n383shqjqfiqzl95";
+    sha256 = "sha256-JdGPo8MSQz3QsCOFCQWi5rY184aVYL5ugVKMKNICLvA=";
   };
 
-  npmDepsHash = "sha256-1w1f0b92i32jh5pbwq4mhvrkbdp6l82hk193n383shqjqfiqzl95";
+  npmDepsHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
 
   dontNpmBuild = true;
 
