@@ -1,6 +1,7 @@
 {
   description = "My personal NUR repository";
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+
   outputs = { self, nixpkgs }:
     let
       systems = [
@@ -15,9 +16,19 @@
       forAllSystems = f: nixpkgs.lib.genAttrs systems (system: f system);
     in
     {
+      # Full imported set: { openspec = pkg; ... }
       legacyPackages = forAllSystems (system: import ./default.nix {
         pkgs = import nixpkgs { inherit system; };
       });
-      packages = forAllSystems (system: nixpkgs.lib.filterAttrs (_: v: nixpkgs.lib.isDerivation v) self.legacyPackages.${system});
+
+      # NEW: Extract only the *derivations* from default.nix
+      packages = forAllSystems (system:
+        let
+          imported = import ./default.nix {
+            pkgs = import nixpkgs { inherit system; };
+          };
+        in
+        nixpkgs.lib.filterAttrs (_: v: nixpkgs.lib.isDerivation v) imported
+      );
     };
 }

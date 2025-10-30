@@ -1,4 +1,3 @@
-# default.nix — Your NUR repo's entrypoint
 { pkgs ? import <nixpkgs> {} }:
 
 let
