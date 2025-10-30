@@ -16,19 +16,15 @@
       forAllSystems = f: nixpkgs.lib.genAttrs systems (system: f system);
     in
     {
-      # Full imported set: { openspec = pkg; ... }
-      legacyPackages = forAllSystems (system: import ./default.nix {
-        pkgs = import nixpkgs { inherit system; };
-      });
+      legacyPackages = forAllSystems (system:
+        import ./default.nix { pkgs = import nixpkgs { inherit system; }; }
+      );
 
-      # NEW: Extract only the *derivations* from default.nix
       packages = forAllSystems (system:
         let
-          imported = import ./default.nix {
-            pkgs = import nixpkgs { inherit system; };
-          };
+          imported = import ./default.nix { pkgs = import nixpkgs { inherit system; }; };
         in
-        nixpkgs.lib.filterAttrs (_: v: nixpkgs.lib.isDerivation v) imported
+        nixpkgs.lib.filterAttrs (n: v: nixpkgs.lib.isDerivation v) imported
       );
     };
 }
