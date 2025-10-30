@@ -9,7 +9,7 @@ pkgs.buildNpmPackage rec {
     sha256 = "sha256-1w1f0b92i32jh5pbwq4mhvrkbdp6l82hk193n383shqjqfiqzl95";
   };
 
-  npmDepsHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+  npmDepsHash = "sha256-1w1f0b92i32jh5pbwq4mhvrkbdp6l82hk193n383shqjqfiqzl95";
 
   dontNpmBuild = true;
 
