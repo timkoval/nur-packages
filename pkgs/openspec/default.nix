@@ -1,24 +1,53 @@
 { pkgs ? import <nixpkgs> {} }:
 
-pkgs.buildNpmPackage rec {
+pkgs.stdenv.mkDerivation rec {
   pname = "openspec";
   version = "0.13.0";
 
   src = pkgs.fetchurl {
-    url = "https://registry.npmjs.org/@fission-ai/openspec/-/openspec-${version}.tgz";
-    sha256 = "sha256-JdGPo8MSQz3QsCOFCQWi5rY184aVYL5ugVKMKNICLvA=";
+    url = "https://github.com/Fission-AI/OpenSpec/archive/refs/tags/v${version}.tar.gz";
+    sha256 = "sha256-gGUoUaya8tW9t6fGDpBvH223zRZQZot9qKQJ5NzZR80=";
   };
 
-  npmDepsHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+  nativeBuildInputs = [ pkgs.nodejs pkgs.pnpm pkgs.cacert pkgs.makeWrapper ];
 
-  dontNpmBuild = true;
+  SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
+
+  unpackPhase = ''
+    tar -xzf $src
+    cd OpenSpec-${version}
+  '';
+
+  postPatch = ''
+    cat > pnpm-workspace.yaml <<EOF
+    packages:
+      - .
+    EOF
+  '';
+
+  buildPhase = ''
+    runHook preBuild
+    pnpm install --frozen-lockfile --ignore-scripts
+    pnpm build
+    runHook postBuild
+  '';
 
   installPhase = ''
     runHook preInstall
-    mkdir -p $out/bin $out/lib/node_modules/@fission-ai
+
+    mkdir -p $out/bin $out/lib/node_modules/@fission-ai/openspec
     cp -r . $out/lib/node_modules/@fission-ai/openspec
-    ln -s $out/lib/node_modules/@fission-ai/openspec/bin/openspec $out/bin/openspec
-    wrapProgram $out/bin/openspec --set NODE_PATH $out/lib/node_modules
+
+    # Create wrapper script
+    cat > $out/bin/openspec <<EOF
+    #!${pkgs.bash}/bin/bash
+    exec ${pkgs.nodejs}/bin/node $out/lib/node_modules/@fission-ai/openspec/bin/openspec.js "\$@"
+    EOF
+    chmod +x $out/bin/openspec
+
+    wrapProgram $out/bin/openspec \
+      --set NODE_PATH $out/lib/node_modules
+
     runHook postInstall
   '';
 
